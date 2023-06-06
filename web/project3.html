@@ -24,12 +24,12 @@
             <br>
             <br>
             <br>
-            INSPECT THE PAGE AND REFRESH IT TO SEE THE DATA IN THE CONSOLE.
+            INSPECT THE PAGE AND REFRESH IT OR CLICK ON 'READ DATABASE' TO SEE THE DATA IN THE CONSOLE.
             <br>
             <br>
-            <button title="THIS BUTON WHILE WE CREATE THE DB" onclick="eel.updateDatabase()();">UPDATE DATABASE</button>
+            <button title="THIS BUTON WHILE WE CREATE THE DB" onclick="eel.updateDatabase()();">READ DATABASE</button>
             <div class="bodyDiv" id="content3">
-                THIS BUTTON WHILE WE FINISH THE DATABASE
+                THIS BUTTON WHILE WE FINISH THE INTERACTIVE ACTIONS
             </div>
             <br>
             <div id="onPageMessage" class="onPageMessage"></div>
@@ -42,16 +42,13 @@
     </body>
 </html>
 
-
+<!-- javaScritp -->
 <script>
     window.onload =  getDataFromPython;
 
     eel.expose(getDataFromPython)
     async function getDataFromPython() {
     var data = await eel.collectData()();
-        if (data === "EXISTS"){
-            var data = await eel.readDataBase()();
-        }
         iterateDict(data);
     };
 
@@ -62,6 +59,7 @@
 
     function iterateDict(data){
         console.log(data);
+
     };
 
     eel.expose(updateMessage)

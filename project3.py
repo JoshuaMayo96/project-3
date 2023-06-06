@@ -10,15 +10,17 @@ import sqlite3
 import csv
 import os
 import traceback
+import io
+import time
 
 class Publish():
     def __init__(self):
-        self.obesity_end_point = 'https://chronicdata.cdc.gov/resource/hn4x-zwk7.json'
+        # self.obesity_end_point = 'https://chronicdata.cdc.gov/resource/hn4x-zwk7.json'
+        self.obesity_end_point = 'https://chronicdata.cdc.gov/api/views/hn4x-zwk7/rows.csv?accessType=DOWNLOAD'
         self.obesit_end_point_geojson = 'https://chronicdata.cdc.gov/resource/hn4x-zwk7.geojson'
         eel.init('web', allowed_extensions=['.html'])
         self.eel = eel
         
-
 class NoSelf():
     def __init__(self):
         global publish
@@ -30,23 +32,18 @@ class NoSelf():
             eel.start('project3.html', port=0)
         except Exception as e:
             print(f"ERROR {e} KEEP IN MIND THAT THIS SCRIPT REQUIRES YOU TO pip install eel")
-
+  
     @eel.expose
     def updateDatabase():
         conn = sqlite3.connect('./Resources/obesity.db')
         try:
-            conn.execute('''CREATE TABLE obesity_data
-                (yearstart,yearend,locationabbr,locationdesc,datasource,class,topic,question,data_value_type,data_value,data_value_alt,
-                low_confidence_limit,high_confidence_limit,sample_size,age_years,classid,topicid,questionid,datavaluetypeid,locationid,
-                stratificationcategory1,stratification1,stratificationcategoryid1,stratificationid1,computed_region_bxsw_vy29,
-                computed_region_he4y_prf8,geolocation_latitude,geolocation_longitude,geolocation_human_address,education,gender,income,
-                total,race_ethnicity,data_value_footnote_symbol,data_value_footnote)''') # this columns must match our data. 
+            conn.execute('''CREATE TABLE obesity_data (YearEnd,LocationDesc,Question,Data_Value,Age_years,GeoLocation)''') 
         except Exception as e: 
             print(e)
             eel.updateMessage("Database already exist reading it")
             NoSelf.readDataBase()
             return
-            # eel.popAlert(str(e))
+
         try:
             # Import data from CSV file
             c = conn.cursor()
@@ -54,13 +51,8 @@ class NoSelf():
                 reader = csv.reader(f)
                 for row in reader:
                     if row[0] == 'yearstart': continue
-                    clause = 'INSERT INTO obesity_data (yearstart,yearend,locationabbr,locationdesc,datasource,class,\
-                            topic,question,data_value_type,data_value,data_value_alt,low_confidence_limit,high_confidence_limit,\
-                            sample_size,age_years,classid,topicid,questionid,datavaluetypeid,locationid,stratificationcategory1,\
-                            stratification1,stratificationcategoryid1,stratificationid1,computed_region_bxsw_vy29,\
-                            computed_region_he4y_prf8,geolocation_latitude,geolocation_longitude,geolocation_human_address,\
-                            education,gender,income,total,race_ethnicity,data_value_footnote_symbol,data_value_footnote)\
-                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'    
+                    clause = 'INSERT INTO obesity_data (YearEnd,LocationDesc,Question,Data_Value,Age_years,GeoLocation)\
+                            VALUES(?,?,?,?,?,?)' 
                     c.execute(clause,row)
             # Query data from table
             cursor = conn.execute("SELECT * from obesity_data")
@@ -84,42 +76,12 @@ class NoSelf():
         tempList = []
         for row in cursor:
             listOfKeys = [
-                "yearstart",
-                "yearend",
-                "locationabbr",
-                "locationdesc",
-                "datasource",
-                "class",
-                "topic",
-                "question",
-                "data_value_type",
-                "data_value",
-                "data_value_alt",
-                "low_confidence_limit",
-                "high_confidence_limit",
-                "sample_size",
-                "age_years",
-                "classid",
-                "topicid",
-                "questionid",
-                "datavaluetypeid",
-                "locationid",
-                "stratificationcategory1",
-                "stratification1",
-                "stratificationcategoryid1",
-                "stratificationid1",
-                "computed_region_bxsw_vy29",
-                "computed_region_he4y_prf8",
-                "geolocation_latitude",
-                "geolocation_longitude",
-                "geolocation_human_address",
-                "education",
-                "gender",
-                "income",
-                "total",
-                "race_ethnicity",
-                "data_value_footnote_symbol",
-                "data_value_footnote"
+                "YearEnd",
+                "LocationDesc",
+                "Question",
+                "Data_Value",
+                "Age_years",
+                "GeoLocation",
             ]
             d = dict()
             indx = 0
@@ -127,8 +89,8 @@ class NoSelf():
                 d.update({listOfKeys[indx] : str(el)})
                 indx += 1
             tempList.append(d)
-            eel.updateMessage(row)
-            print(row)
+            eel.updateMessage(str(row))
+            # print(row)
         eel.updateMessage(" COMPLETED READING DATABASE")
         return(tempList)
 
@@ -141,16 +103,65 @@ class NoSelf():
         eel.updateMessage("Collecting Data, please wait")
         try:
             dataJson = requests.get(publish.obesity_end_point)
-            # dataGeoJson = requests.get(publish.obesit_end_point_geojson) # we will pass this to JS instead? maybe.... 
-            d = json.loads(dataJson.text) #pass data to JS 
-            df = pd.json_normalize(d)
+            dataJson.encoding = 'utf-8'
+            csvio = io.StringIO(dataJson.text, newline="")
+            data = []
+            for row in csv.DictReader(csvio):
+                data.append(row)
+   
+            df = pd.DataFrame.from_records(data)
+            # df = df.dropna()
             df.columns = df.columns.str.replace('[:,@]', '', regex=True)
             df.columns = df.columns.str.replace('[.]', '_', regex=True)
-            df.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
+            df = df[['YearEnd', 'LocationDesc', 'Question', 'Data_Value', 'Age(years)', 'GeoLocation']]
+            df = df.rename(columns={'Age(years)': 'Age_years'}) #changed this name becuase caused issues with DB. 
+            # print (df.isnull().sum())
+            # df_clean = df.dropna() #Do not seem to be nas are maybe blank row. 
+            df_clean = df_clean[df_clean.YearEnd != ''] #Removed blanks them like this
+            df_clean = df_clean[df_clean.LocationDesc != '']
+            df_clean = df_clean[df_clean.Question != '']
+            df_clean = df_clean[df_clean.Data_Value != '']
+            df_clean = df_clean[df_clean.Age_years != '']
+            df_clean = df_clean[df_clean.GeoLocation != '']
+            df_clean.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
+
             eel.updateMessage("")
+            d = df_clean.to_json()
+            NoSelf.createDataBase(d)
             return(d)
         except Exception as e:
             print(e)
+
+    def createDataBase(d):
+        conn = sqlite3.connect('./Resources/obesity.db')
+        try:
+            conn.execute('''CREATE TABLE obesity_data (YearEnd,LocationDesc,Question,Data_Value,Age_years,GeoLocation)''')
+        except Exception as e: 
+            print(e)
+            eel.updateMessage("Database already exist reading it")
+            NoSelf.readDataBase()
+            return
+
+        try:
+            # Import data from CSV file
+            c = conn.cursor()
+            with open('./Resources/obesity_data.csv', 'r') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    if row[0] == 'YearEnd': continue
+                    clause = 'INSERT INTO obesity_data (YearEnd,LocationDesc,Question,Data_Value,Age_years,GeoLocation)\
+                            VALUES(?,?,?,?,?,?)' 
+                    c.execute(clause,row)
+            # Query data from table
+            # cursor = conn.execute("SELECT * from obesity_data")
+            # for row in cursor:
+            #     eel.updateMessage(row)
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            traceback.print_exc()
+            message = "THE DATABASE CODE HAS ISSUES IN PYTHON... FUNCTION 'updateDatabase'  " + str(e)
+            eel.updateMessage(message)
 
 
 if __name__ == "__main__":
