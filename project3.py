@@ -92,6 +92,19 @@ class NoSelf():
             eel.updateMessage(str(row))
             # print(row)
         eel.updateMessage(" COMPLETED READING DATABASE")
+        # y11 = [x for x in tempList if x['YearEnd'] == '2011']
+        # y12 = [x for x in tempList if x['YearEnd'] == '2012']
+        # y13 = [x for x in tempList if x['YearEnd'] == '2013']
+        # y14 = [x for x in tempList if x['YearEnd'] == '2014']
+        # y15 = [x for x in tempList if x['YearEnd'] == '2015']
+        # y16 = [x for x in tempList if x['YearEnd'] == '2016']
+        # y17 = [x for x in tempList if x['YearEnd'] == '2017']
+        # y18 = [x for x in tempList if x['YearEnd'] == '2018']
+        # y19 = [x for x in tempList if x['YearEnd'] == '2019']
+        # y20 = [x for x in tempList if x['YearEnd'] == '2020']
+        # y21 = [x for x in tempList if x['YearEnd'] == '2021']
+
+
         return(tempList)
 
     @eel.expose
@@ -116,7 +129,7 @@ class NoSelf():
             df = df[['YearEnd', 'LocationDesc', 'Question', 'Data_Value', 'Age(years)', 'GeoLocation']]
             df = df.rename(columns={'Age(years)': 'Age_years'}) #changed this name becuase caused issues with DB. 
             # print (df.isnull().sum())
-            # df_clean = df.dropna() #Do not seem to be nas are maybe blank row. 
+            df_clean = df.dropna() #Do not seem to be nas are maybe blank row. 
             df_clean = df_clean[df_clean.YearEnd != ''] #Removed blanks them like this
             df_clean = df_clean[df_clean.LocationDesc != '']
             df_clean = df_clean[df_clean.Question != '']
