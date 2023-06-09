@@ -33,10 +33,16 @@
             <label class="label1">SELECT STATE:</label>
             <select style="display:inline-block"title="Select State" id="selState" onchange="stOptionChanged(this.value)"></select>
         </div>&nbsp;&nbsp;&nbsp;&nbsp;
-        <div style="display:inline-block" id="onPageMessage" class="onPageMessage"></div>
-        <div style="display:inline-block;" class="bodyDiv" id="plot"></div>
-        <div style="display:inline-block;" class="bodyDiv sortable" id="table"></div>
-        <div class="bodyDiv" id="content2"></div>          
+        <div style="width: 500px; height: 500px;" id="mapDiv"></div>
+        <br>
+        <div style="display:inline-block;" class="bodyDiv" id="plot"></div><br><br>
+        <div style="display:inline-block;" class="bodyDiv" id="plot2"></div><br><br>
+        <br>
+        <div  id="onPageMessage" class="onPageMessage"></div>
+        <br>
+        <div  class="bodyDiv sortable" id="table"></div>
+        
+        <!-- <div class="bodyDiv" id="content2"></div>           -->
     </body>
 </html>
 
@@ -139,7 +145,6 @@
             el.value = opt;
             stateSelected.appendChild(el);
         }
-
     };
     function stOptionChanged(stateSelected){
         document.getElementById("onPageMessage").innerText = "";
@@ -165,11 +170,33 @@
         });
         // wholeThingList[0] is the year
         // wholeThingList[1] is the State
-        // wholeThingList[0] is the Question
+        question = [];
+       
+        wholeThingList.forEach((el) => {
+            q = el[2];
+            tempList = [];
+            if (q.includes("Percent of adults aged 18 years and older who have obesity")){
+                // console.log("here    " + el[0])
+                year = el[0];
+                state = el[1];
+                percentage = el[3];
+                ageRange = el[4];
+                coordinates = el[5];
+                tempList.push([q,year,state,percentage,ageRange,coordinates]);
+            }   
+            // question.push(question);
+            
+            question.push(tempList);
+
+
+            // console.log(el);
+        });
+
+        // console.log(coordinates); // is the Question;
         // wholeThingList[0] is the percentage
         // wholeThingList[0] is the age range
         // wholeThingList[0] is the state coordinates which are the same from all. 
-        console.log(wholeThingList);
+        // console.log(wholeThingList);
         //create a Table Object
         var result = "<table id='sortable' border=1> <thead> <tr><th onclick='sortBy(0)'>YEAR</th><th onclick='sortBy(1)'>State</th><th onclick='sortBy(2)'>Question</th><th onclick='sortBy(3)'>Percentage</th><th onclick='sortBy(4)'>Age Range</th><th onclick='sortBy(5)'>Coordinates</th></tr></thead>";
             for(var i=0; i<wholeThingList.length; i++) {
@@ -180,20 +207,43 @@
                 result += "</tr>";
             }
             result += "</table>";
-          
-
         document.getElementById("table").innerHTML = result;
-      
+        // console.log(wholeThingList);
+
+
+        addMap(coordinates);
     };
 
-    // function addMap(coordinates) {
-    //     var map = L.map('map').setView([51.505, -0.09], 13);
-    //     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //         maxZoom: 19,
-    //         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    //     }).addTo(map);
+    function addMap(coordinates) {
+        
+        var cordinates = coordinates.split(",");
+        var lat = coordinates.split("(");
+        // console.log(cordinates);
+        lat = cordinates[0].replace("(", "");
+        lon = cordinates[1].replace(")", "");
+        lat1 = parseFloat(lat);
+        lon1 = parseFloat(lon);
+        console.log(lat1);
+        console.log(lon1);
+        // lat.replace("(") //.replace(")");
+        // console.log(lat);
+        // lon = coordinates[1].replace("(").replace(")");
+        // console.log(lat);
+        // console.log(lon);
+        try{
+            map.remove();
+        }catch (e){
+            console.log("NORMAL THE FIRST TIME IT RUNS");
+        };
 
-    // };
+        var map = L.map('mapDiv').setView([lat1, lon1], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+
+        }).addTo(map);
+
+    };
 
 
     function optionChanged(yearSelected) {
@@ -203,16 +253,27 @@
             return
         }
         addPlot(yearSelected);
+        createLineChart();
     };
 
     function addPlot(yearSelected) {
         ySelectedArray = [];
+        yearAgeRange = [];
         data.forEach((element) => {
             if (element.YearEnd == yearSelected){
                 ySelectedArray.push(element);
+                yearAgeRange.push(element.Age_year)
             }
         });
         var dictOfStates = {};
+        var dictofRanges = {};
+        // console.log("state" + states); y axis obesity percentage --- average by year. 
+
+        // yearAgeRange.forEach(() => { 
+
+
+        // });
+
         states.forEach((st) => {
             dataValue = 0
                 count = 0
@@ -224,7 +285,7 @@
                 dVal = (Number(dataValue) / Number(count));
                 if (dVal == "NaN"){
                     dVal = "0";
-                }
+                }   
                 dictOfStates[st] = dVal .toFixed(2);
             });
         });
@@ -245,12 +306,12 @@
         };
 
         let trace = {
-            x: xval,
-            y: yval,
+            y: xval,
+            x: yval,
             lable: yearSelected,
             
             type: 'bar',
-            orientation:"h",
+            // orientation:"h",
             mode: 'lines+markers',
             marker: { color: "cyan-blue" },
         };
@@ -258,12 +319,12 @@
         let layout = {
             margin: { 
                 t:25, 
-                b:22,
-                l: 150,
+                b:150,
+                l: 25,
                 r: 10,
             },
             width: 1400,
-            height: 1300,
+            height: 500,
             title: "COMBINED PERCENTAGE (AVE) PER STATE FOR THE YEAR " + yearSelected 
         };
 
@@ -314,5 +375,57 @@
         }
     }
 }
+
+function createLineChart() {
+    // Extract the necessary data from your source or modify it as per your requirements
+    // console.log(data);
+    const yearData = [
+        { year: 2011, value: 32 },
+        { year: 2012, value: 28 },
+        { year: 2013, value: 32 },
+        { year: 2014, value: 29 },
+        { year: 2015, value: 32 },
+        { year: 2016, value: 29 },
+        { year: 2017, value: 31 },
+        { year: 2018, value: 30 },
+        { year: 2019, value: 33 },
+        { year: 2020, value: 30 },
+        { year: 2021, value: 31 }
+    ];
+    // Extract x and y values from the data
+    console.log(data);
+    const xValues = yearData.map(data => data.year);
+    const yValues = yearData.map(data => data.value);
+    // Create a trace for the line chart
+    const trace = {
+        x: xValues,
+        y: yValues,
+        type: 'scatter',
+        mode: 'lines+markers',
+        marker: {
+            color: 'blue'
+        }
+    };
+    // Create a layout for the line chart
+    const layout = {
+        title: 'Percentage of Adults with Obesity Year Over Year',
+        xaxis: {
+            title: 'Year',
+            tickvals: xValues,
+            tickmode: 'linear',
+            tickangle: -25
+        },
+        yaxis: {
+            title: 'Percentage',
+            range: [25, 40] // Set the range from 0 to 50 on the y-axis
+        },
+        height: 500,
+        width: 800
+    };
+    // Plot the line chart
+    Plotly.newPlot('plot2', [trace], layout);
+}
+// Call the function to create the line chart on page load
+// window.addEventListener('DOMContentLoaded', createLineChart);
     
 </script>

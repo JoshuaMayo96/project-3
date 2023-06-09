@@ -118,11 +118,14 @@ class NoSelf():
             df_clean = df_clean[df_clean.Data_Value != '']
             df_clean = df_clean[df_clean.Age_years != '']
             df_clean = df_clean[df_clean.GeoLocation != '']
-            df_clean.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
+            df_question = df_clean[df_clean.Question == 'Percent of adults aged 18 years and older who have obesity']
+            # df_clean.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
+            # df_filtered = df_clean[df_clean["Question"] == "Percent of adults aged 18 years and older who have obesity"]
+            df_question.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
             eel.updateMessage("")
-            d = df_clean.to_json()
+            d = df_question.to_json()
             NoSelf.createDataBase(d)
-            return(d)
+            return d
         except Exception as e:
             print(e)
             eel.updateMessage(e)
