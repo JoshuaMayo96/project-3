@@ -1,49 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="shortcut icon" href="#">
-        <link href="cssFile.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-            crossorigin=""
-        />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-            crossorigin="">
-        </script>
-        <script type="text/javascript" src="eel.js"></script>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <script type="text/javascript" src="logic.js"></script>
-        <title>PROJECT-3</title>
-    </head>
 
-    <body id="this_body">
-        <div style="display:inline-block"id="onPageMessage" class="onPageMessage"></div>
-        <button style="display:inline-block" class="button-7"  title="DELETES AND REDOWNLOADS THE DATA" onclick="preDeleteDatabaseHTML();">DOWNLOAD DATA</button><br>
-        <div style="display:inline-block; margin-right: 1100px;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="#">
+    <link href="cssFile.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+        </script>
+    <script type="text/javascript" src="eel.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="logic.js"></script>
+    <title>PROJECT-3</title>
+</head>
+
+<body id="this_body">
+    <div style="display:inline-block" id="onPageMessage" class="onPageMessage"></div>
+    <button style="display:inline-block" class="button-7" title="DELETES AND REDOWNLOADS THE DATA"
+        onclick="preDeleteDatabaseHTML();">DOWNLOAD DATA</button><br>
+    <div style="display:inline-block; margin-right: 1100px;">
         <div style="display:inline-block">
             <label class="label1">SELECT STATE:</label>
-            <select style="display:inline-block"title="Select State" id="selState" onchange="stOptionChanged(this.value)"></select>
+            <select style="display:inline-block" title="Select State" id="selState"
+                onchange="stOptionChanged(this.value)"></select>
         </div>
+    </div>
+    <br>
+
+    <!-- <div class="row">
+        <div class="container"></div>
+        <div class="center"style="display:inline-block; width:500px; height: 500px; margin: auto;" id="mapDiv"></div>
+        <div class="container"></div>
+      </div> -->
+    <div class="row">
+        <div class="container"></div>
+        <div class="center" style="display: flex; justify-content: center;">
+            <div style="width: 600px; height: 600px;" id="mapDiv"></div>
+        </div>
+        <div class="container"></div>
+    </div>
+
+    <!-- <div style="display:inline-block; width: 500px; height: 500px;" id="mapDiv"></div><br> -->
+    <!-- <div style="display:inline-block; width:500px; height: 500px; margin:0 auto;" id="mapDiv"></div><br> -->
+    <!-- <div style="display:inline-block;" class="bodyDiv" id="plot3"></div><br>
+    <div style="display:inline-block;" class="bodyDiv sortable" id="table"></div><br>
+
+    <div> -->
+
+    <div class="row">
+        <div class="container"></div>
+        <div style="display: flex; justify-content: center;">
+            <div class="bodyDiv" id="plot3"></div>
         </div>
         <br>
-        <div>
-            <div style="display:inline-block; width: 500px; height: 500px;" id="mapDiv"></div>
-            <div  style="display:inline-block;" class="bodyDiv sortable" id="table"></div>
-            <div style="display:inline-block;" class="bodyDiv" id="plot3"></div>
+        <div style="display: flex; justify-content: center;">
+            <div class="bodyDiv sortable" id="table"></div>
         </div>
         <br>
-        <label class="label1">SELECT YEAR:</label>
-        <select style="display:inline-block"title="Select Year" id="selYear" onchange="optionChanged(this.value)"></select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <br>
-        <div id="plotDiv" style="width: 100%;">
-            <div style="display:inline-block;" class="bodyDiv" id="plot"></div>
-            <div style="display:inline-block;" class="bodyDiv" id="plot2"></div>
-        </div>
-        <br>
-    </body>
+        <div class="container"></div>
+    </div>
+    <!-- <div style="display:inline-block; width:500px; height: 500px;"></div>
+        <div style="display:inline-block; width:500px; height: 500px; margin:0 auto;" id="mapDiv"></div><br> -->
+    </div>
+    <br>
+    <label class="label1">SELECT YEAR:</label>
+    <select style="display:inline-block" title="Select Year" id="selYear"
+        onchange="optionChanged(this.value)"></select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <br>
+    <!-- <div id="plotDiv" style="width: 100%;">
+        <div style="display:inline-block;" class="bodyDiv" id="plot"></div><br>
+        <div style="display:inline-block;" class="bodyDiv" id="plot2"></div>
+    </div> -->
+
+    <div id="plotDiv" style="width: 100%; display: flex; justify-content: center;">
+        <div class="bodyDiv" id="plot"></div><br>
+        <div class="bodyDiv" id="plot2"></div>
+    </div>
+    <br>
+</body>
+
 </html>
 
