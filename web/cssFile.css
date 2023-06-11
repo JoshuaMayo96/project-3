@@ -5,13 +5,15 @@ table.sortable thead {
   cursor: default;
 }
 #table {
-   height: 1200px; 
-   max-width: 1500px;
+   height: 500px; 
+   max-width: 750px;
+   max-height: 500px;
    overflow: scroll;
    color: black;
    resize: both;
 
   }
+
 .bodyDiv{
     text-align: center;
     /* animation: multicolor 7s infinite, vibrate 3s infinite ; */

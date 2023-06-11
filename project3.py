@@ -17,7 +17,7 @@ class Publish():
         # self.obesity_end_point = 'https://chronicdata.cdc.gov/resource/hn4x-zwk7.json' # only 1K records
         # self.obesity_end_point_geojson = 'https://chronicdata.cdc.gov/resource/hn4x-zwk7.geojson' # only 1K records
         self.obesity_end_point = 'https://chronicdata.cdc.gov/api/views/hn4x-zwk7/rows.csv?accessType=DOWNLOAD'
-        eel.init('web', allowed_extensions=['.html'])
+        eel.init('web', allowed_extensions=['.js', '.html']) #include the .js if you decide to create the JS in a separate file. 
         self.eel = eel
         
 class NoSelf():
@@ -61,9 +61,23 @@ class NoSelf():
         except Exception as e:
             traceback.print_exc()
             message = "THE DATABASE CODE HAS ISSUES IN PYTHON... FUNCTION 'updateDatabase'  " + str(e)
-            # eel.popAlert(message)
             eel.updateMessage(message)
-               
+            
+    @eel.expose
+    def getLocalPath():
+        file_path = str(os.getcwd() + "\\Resources\\obesity.db")
+        return (file_path)
+
+
+    @eel.expose
+    def deleteDatabase():
+        file_path = str(os.getcwd() + "\\Resources\\obesity.db")
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            print(e)
+            eel.updateMessage("ERROR DB DOES NOT APPEAR TO EXIST...")
+        NoSelf.collectData()
 
     @eel.expose
     def readDataBase():
@@ -88,7 +102,7 @@ class NoSelf():
             tempList.append(d)
             eel.updateMessage(str(row))
             # print(row)
-        eel.updateMessage(" FINISHED READING DATABASE. SELECT YEAR OR STATE")
+        eel.updateMessage("MAKE YOUR SELECTION BELOW")
         return(tempList)
 
     @eel.expose
@@ -104,6 +118,7 @@ class NoSelf():
             csvio = io.StringIO(dataJson.text, newline="")
             data = []
             for row in csv.DictReader(csvio):
+                # eel.updateMessage(str(row))
                 data.append(row)
    
             df = pd.DataFrame.from_records(data)
@@ -119,8 +134,6 @@ class NoSelf():
             df_clean = df_clean[df_clean.Age_years != '']
             df_clean = df_clean[df_clean.GeoLocation != '']
             df_question = df_clean[df_clean.Question == 'Percent of adults aged 18 years and older who have obesity']
-            # df_clean.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
-            # df_filtered = df_clean[df_clean["Question"] == "Percent of adults aged 18 years and older who have obesity"]
             df_question.to_csv('./Resources/obesity_data.csv', index=False, encoding='utf-8')
             eel.updateMessage("")
             d = df_question.to_json()
@@ -151,6 +164,7 @@ class NoSelf():
                     c.execute(clause,row)
             conn.commit()
             conn.close()
+            eel.updateMessage("SELECT YEAR OR STATE")
         except Exception as e:
             traceback.print_exc()
             message = "THE DATABASE CODE HAS ISSUES IN PYTHON... FUNCTION 'updateDatabase'  " + str(e)
