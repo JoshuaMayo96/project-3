@@ -165,7 +165,7 @@
             question.push(tempList);
         });
 
-        var result = "<table id='sortable' border=1> <thead> <tr><th onclick='sortBy(0)'>YEAR</th><th onclick='sortBy(1)'>State</th><th onclick='sortBy(2)'>Question</th><th onclick='sortBy(3)'>Percentage</th><th onclick='sortBy(4)'>Age Range</th><th onclick='sortBy(5)'>Coordinates</th></tr></thead>";
+        var result = "<table id='sortable' border=1> <thead> <tr><th class='header' onclick='sortBy(0)'>YEAR</th><th class='header'onclick='sortBy(1)'>State</th><th class='header' onclick='sortBy(2)'>Question</th><th class='header' onclick='sortBy(3)'>Percentage</th><th class='header' onclick='sortBy(4)'>Age Range</th><th class='header' onclick='sortBy(5)'>Coordinates</th></tr></thead>";
             for(var i=0; i<wholeThingList.length; i++) {
                 result += "<tr>";
                 for(var j=0; j<wholeThingList[i].length; j++){
@@ -176,11 +176,11 @@
             result += "</table>";
         document.getElementById("table").innerHTML = result;
 
-        addMap(coordinates);
+        addMap(coordinates, stateSelected   );
         createPieChartForState(stateSelected);
     };
 
-    function addMap(coordinates) {
+    function addMap(coordinates, stateSelected) {
         var cordinates = coordinates.split(",");
         var lat = coordinates.split("(");
         lat = cordinates[0].replace("(", "");
@@ -194,10 +194,15 @@
         var map = L.map('mapDiv').setView([lat1, lon1], 13);
         map.setZoom(7);
         L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-            maxZoom: 7,
+            maxZoom: 15,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS',
 
         }).addTo(map);
+        var marker = L.marker([lat1, lon1]);    // Creating a Marke
+         // Adding popup to the marker
+         marker.bindPopup(stateSelected).openPopup();
+         marker.bindTooltip(stateSelected, {permanent: true, className: stateSelected, offset: [0, 0] });
+         marker.addTo(map); // Adding marker to the map
     };
 
     function optionChanged(yearSelected) {
