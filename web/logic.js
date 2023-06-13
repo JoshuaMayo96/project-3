@@ -433,7 +433,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             },
             width: 1255,
             height: 500,
-            title: "Obesity Prevelance by State for" + yearSelected 
+            title: "Obesity Prevelance by State for " + yearSelected 
         };
         Plotly.newPlot("plot", [ trace ], layout);
     };
