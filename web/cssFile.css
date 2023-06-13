@@ -1,3 +1,26 @@
+
+#label1{
+  position: fixed; 
+  /* margin-left: 10em; */
+  margin-right : 10px;
+  display:inline-block
+}
+#label2{
+  position: fixed; 
+  margin-left: 10em;
+  margin-right : 10em;
+  display:inline-block
+}
+#selYear{
+  position: fixed; 
+  margin-left: 10em;
+  margin-right : 10em;
+  display:inline-block
+}
+#selState{
+  position: fixed; 
+  display:inline-block
+}
 table.sortable thead {
   background-color:#eee;
   color:#666666;

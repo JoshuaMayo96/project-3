@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -17,7 +17,7 @@
         <script type="text/javascript" src="eel.js"></script>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         <script type="text/javascript" src="logic.js"></script>
-        <!-- <script type="text/javascript" src="us-states.json"></script> -->
+
         <title>PROJECT-3</title>
     </head>
 
@@ -48,4 +48,86 @@
         </div>
         <br>
     </body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="#">
+    <link href="cssFile.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+        </script>
+    <script type="text/javascript" src="eel.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="logic.js"></script>
+    <title>PROJECT-3</title>
+</head>
+<title>Obesity Prevalence By State</title>
+<body id="this_body">
+    
+    <div style="display:inline-block" id="onPageMessage" class="onPageMessage"></div>
+    <button style="display:inline-block" class="button-7" title="DELETES AND REDOWNLOADS THE DATA"
+        onclick="preDeleteDatabaseHTML();">DOWNLOAD DATA</button><br>
+    <div style="display:inline-block; margin-right: 1100px;">
+        <div style="display:inline-block">
+            <label style="display:inline-block" id="label1" class="label1">SELECT STATE:</label>
+            <label  style="display:inline-block;"id="label2"class="label1">SELECT YEAR:</label>
+        </div>
+        <br><br>
+            <select style="display:inline-block; "title="Select State" id="selState" onchange="stOptionChanged(this.value)"></select>
+            <select style="display:inline-block;margin-left: 200px;" title="Select Year" id="selYear"onchange="optionChanged(this.value)"></select>
+            <br>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="container"></div>
+        <div class="center" style="display: flex; justify-content: center;">
+            <div style="display:inline-block; width: 750px; height: 550px;" id="mapDiv">
+                <canvas id="mapCanvas"></canvas>
+            </div>
+        </div>
+        <div class="container"></div>
+    </div>
+    <div class="row">
+        <div class="container"></div>
+        <div style="display: flex; justify-content: center;">
+            <div class="bodyDiv" id="plot3"></div>
+        </div>
+        <br>
+        <div style="display: flex; justify-content: center;">
+            <div class="bodyDiv sortable" id="table"></div>
+        </div>
+        <br>
+        <div class="container"></div>
+    </div>
+    </div>
+    <br>
+    
+      <div id="plotDiv" style="width: 100%; display: flex; justify-content: center;">
+        <div class="bodyDiv" id="plot"></div><br>
+        <div class="bodyDiv" id="plot2"></div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+  
+    <div id="bottom">------------</div>
+    <br>
+</body>
 </html>

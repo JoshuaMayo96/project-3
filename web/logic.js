@@ -2,7 +2,8 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
     var cPrev = -1;
     window.onload =  getDataFromPython;
     var states = [
-            'Alaska',	
+            'Alaska',
+            'Alabama',
             'Arizona',	
             'Arkansas',	
             'California',	
@@ -34,7 +35,8 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             'New Mexico',	
             'New York',	
             'North Carolina',
-            'North Dakota','Ohio',	
+            'North Dakota',
+            'Ohio',	
             'Oklahoma',	
             'Oregon',
             'Pennsylvania',	
@@ -49,20 +51,21 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             'Washington',
             'West Virginia',
             'Wisconsin',
-            'Wyoming',
-            'American Samoa',
-            'District of Columbia',
-            'Federated States of Micronesia',
-            'Guam',
-            'Marshall Islands',
-            'Northern Mariana Islands',
-            'Palau',
-            'Puerto Rico',
-            'Virgin Islands'
+            'Wyoming',  
         ]
+        // 'Palau',
+        // 'Puerto Rico',
+        // 'Virgin Islands'
+        // 'Federated States of Micronesia',
+        //     'Guam',
+        //     'Marshall Islands',
+        //     'Northern Mariana Islands',
+        // 'American Samoa',
+        // 'District of Columbia',
 
     eel.expose(getDataFromPython);
     async function getDataFromPython() {
+        window.resizeTo(screen.availWidth, screen.availHeight);
         globalThis.data = await eel.collectData()(); //needs to be a global var so we can access it from any function. 
         globalThis.mapsData = await eel.getJsonMap()();
         iterateDict();
@@ -156,6 +159,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
     function stOptionChanged(stateSelected) {
         document.getElementById("onPageMessage").innerText = "";
+        document.getElementById("mapCanvas").scrollIntoView(true);
         if (stateSelected === "") {
           document.getElementById("mapDiv").innerText = "";
           return;
@@ -218,7 +222,6 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
     var map; // Declare map as a global variable
     var marker; // Declare marker as a global variable
-    
     function addMap(coordinates, stateSelected, averagePercentage) {
       var cordinates = coordinates.split(",");
       var lat = coordinates.split("(");
@@ -226,26 +229,23 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
       lon = cordinates[1].replace(")", "");
       lat1 = parseFloat(lat);
       lon1 = parseFloat(lon);
-    
       // Check if the map is already initialized
       if (!map) {
         // Create a new map only if it doesn't exist
         map = L.map("mapDiv").setView([lat1, lon1], 13);
-        map.setZoom(7);
+        map.setZoom(5);
         L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
-          maxZoom: 50,
+          maxZoom: 5,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS',
         }).addTo(map);
       } else {
         // If the map already exists, just update the view
         map.setView([lat1, lon1], 13);
       }
-    
       var thisStateCoords = [];
       Object.entries(mapsData).forEach((entry) => {
         const [key, val] = entry;
         let v = val;
-    
         if (typeof v === "string") {
           // Do nothing because it is not an object.
         } else {
@@ -261,29 +261,25 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
           });
         }
       });
-    
       console.log(thisStateCoords); // Verify if thisStateCoords contains the correct coordinates
-    
       // Check if thisStateCoords is empty or null
       if (thisStateCoords === null || thisStateCoords.length === 0) {
         console.log("No coordinates found for the selected state.");
         return; // Exit the function if no coordinates are found
       }
-    
       var polygonCoords = []; // Create an array to hold the polygon coordinates
       for (var i = 0; i < thisStateCoords.length; i++) {
         var coord = [thisStateCoords[i][1], thisStateCoords[i][0]];
         polygonCoords.push(coord);
       }
-    
+      var color = getColorFromPercentage(averagePercentage);
       var statePolygon = L.polygon(polygonCoords, {
-        fillColor: averagePercentage >= 50 ? "darkred" : "lightgreen",
+        fillColor: color,
         color: "white",
-        weight: 2,
+        weight: 1,
         opacity: 1,
-        fillOpacity: 0.5,
+        fillOpacity: 0.9,
       }).addTo(map);
-    
       // Event listeners for hover behavior
       statePolygon.on('mouseover', function (e) {
         if (!marker) {
@@ -294,13 +290,27 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
         }
         marker.openPopup();
       });
-    
       statePolygon.on('mouseout', function (e) {
         if (marker) {
           map.removeLayer(marker);
           marker = null;
         }
       });
+    }
+    function getColorFromPercentage(percentage) {
+      // Calculate the color based on the percentage value
+      var darkred = Math.round((percentage - 20) * (255 / 25));
+      var green = Math.round((40 - percentage) * (255 / 25));
+      var blue = 0;
+      return rgbToHex(darkred, green, blue);
+    }
+    function rgbToHex(r, g, b) {
+      // Convert RGB values to hexadecimal color code
+      var componentToHex = function (c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+      };
+      return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
     }
 
 
@@ -309,6 +319,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
     function optionChanged(yearSelected) {
         document.getElementById("onPageMessage").innerText = "";
+        document.getElementById("bottom").scrollIntoView(true);
         if (yearSelected == ""){
             document.getElementById("plot").innerText = "";
             document.getElementById("plot2").innerText = "";
@@ -486,3 +497,7 @@ function createPieChartForState(stateSelected) {
     };
     Plotly.newPlot('plot3', dat, layout);
 };
+
+// function focusDiv() {
+//     document.getElementById("plotDiv").focus();
+// };
