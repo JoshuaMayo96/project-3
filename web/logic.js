@@ -146,6 +146,9 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
         stateSelected = document.getElementById("selState");
         for (var i = 0; i < uniqueActualStates.length; i++) {
           var opt = uniqueActualStates[i];
+          if(["Guam","Puerto Rico"].includes(opt)) {
+            continue;
+          }
           var el = document.createElement("option");
           el.textContent = opt;
           el.value = opt;
@@ -319,7 +322,11 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
     function optionChanged(yearSelected) {
         document.getElementById("onPageMessage").innerText = "";
-        document.getElementById("bottom").scrollIntoView(true);
+        document.getElementById('plot2').scrollIntoView({
+          behavior: 'auto',
+          block: 'center',
+          inline: 'center'
+      });
         if (yearSelected == ""){
             document.getElementById("plot").innerText = "";
             document.getElementById("plot2").innerText = "";

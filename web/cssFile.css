@@ -5,6 +5,15 @@
   margin-right : 10px;
   display:inline-block
 }
+#titleLine{
+  font-size: 25px;
+  font-weight: bolder;
+  color: rgb(8, 8, 8);
+  text-decoration: underline;
+  position: fixed; 
+  margin-bottom: 10px;
+}
+
 #label2{
   position: fixed; 
   margin-left: 10em;
@@ -23,7 +32,7 @@
 }
 table.sortable thead {
   background-color:#eee;
-  color:#666666;
+  color:#252424;
   font-weight: bold;
   cursor: default;
 }
@@ -68,12 +77,12 @@ table.sortable thead {
     margin-top: 5px;
 }
 .onPageMessage{
-  color:rgb(247, 0, 0);
-  font-size: 25px;
+  color:rgb(175, 169, 169);
+  font-size: 15px;
   font-weight: bolder;
 }
 .label1{
-  color:rgb(250, 5, 5);
+  color:rgb(0, 0, 0);
   font-size: 20px;
   font-weight: bolder;
 }
