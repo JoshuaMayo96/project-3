@@ -8,6 +8,7 @@ import csv
 import os
 import traceback
 import io
+import json
 # from pandas_geojson import read_geojson_url #pip install pandas_geojson, decided to get it with requests. 
 # import json   # didn't need json 
 # import time # did not have to use time. 
@@ -31,7 +32,17 @@ class NoSelf():
             eel.start('project3.html', port=0) #port 0 finds any available port. 
         except Exception as e:
             print(f"ERROR {e} KEEP IN MIND THAT THIS SCRIPT REQUIRES YOU TO pip install eel")
-  
+    
+    @eel.expose
+    def getJsonMap():
+        path = str(os.getcwd() + "/web/us-states.json")
+        # path = 'C:/Users/joshu/homework/project-3/web/us-states.json'
+        mapsData = open(path)
+        content = mapsData.read()
+        jsonData = json.loads(content)
+        mapsData.close()
+        return(jsonData)
+
     @eel.expose
     def updateDatabase(): # The DB is updated from the CSV file cleaned when collecting the data. 
         conn = sqlite3.connect('./Resources/obesity.db')
@@ -97,7 +108,13 @@ class NoSelf():
             d = dict()
             indx = 0
             for el in row:
-                d.update({listOfKeys[indx] : str(el)})
+                try:
+                    d.update({listOfKeys[indx] : str(el)})
+                except:
+                    os.remove("C:/c_folder/c_folder/PROJECT3/Resources/obesity.db")
+                    os.remove("C:/c_folder/c_folder/PROJECT3/Resources/obesity_data.csv")
+                    traceback.print_exc()
+                    print("Please restart the software")
                 indx += 1
             tempList.append(d)
             eel.updateMessage(str(row))
