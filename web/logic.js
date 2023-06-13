@@ -1,5 +1,4 @@
-
-    document.title = "procject-3 Percent of adults aged 18 years and older who have obesity";
+document.title = "procject-3 Percent of adults aged 18 years and older who have obesity";
     var cPrev = -1;
     window.onload =  getDataFromPython;
     var states = [
@@ -65,6 +64,7 @@
     eel.expose(getDataFromPython);
     async function getDataFromPython() {
         globalThis.data = await eel.collectData()(); //needs to be a global var so we can access it from any function. 
+        globalThis.mapsData = await eel.getJsonMap()();
         iterateDict();
         populateYear();
     };
@@ -83,6 +83,10 @@
         deleteDatabaseHTML(loc);
     }
 
+
+
+
+
     function clearAllDivs() {
         document.getElementById("mapDiv").innerHTML ="";
         document.getElementById("plot").innerHTML ="";
@@ -91,6 +95,10 @@
         document.getElementById("onPageMessage").innerHTML ="";
         document.getElementById("table").innerHTML ="";
     }
+
+
+
+
 
     function deleteDatabaseHTML(loc) {
         mes = "Delete " + loc + "?";
@@ -101,6 +109,10 @@
             document.getElementById("onPageMessage").innerHTML = "SELECT YEAR OR STATE BELOW";
         }
     };
+
+
+
+
 
     function iterateDict(){
         var options = ['','2011', '2012','2013','2014','2015','2016','2017','2018','2019','2020', '2021'];
@@ -114,41 +126,61 @@
         }
     };
 
-    function populateYear(){
+
+
+
+
+    function populateYear() {
         var listOfActualStates = [];
         data.forEach((element) => {
-            listOfActualStates.push(element.LocationDesc);
+          listOfActualStates.push(element.LocationDesc);
         });
-        const uniqueActualStates = listOfActualStates.filter((value, index) => listOfActualStates.indexOf(value) === index);
+        const uniqueActualStates = listOfActualStates.filter(
+          (value, index) => listOfActualStates.indexOf(value) === index
+        );
+        uniqueActualStates.sort(); // Sort the states alphabetically
         uniqueActualStates.unshift("");
         stateSelected = document.getElementById("selState");
-        for(var i = 0; i < uniqueActualStates.length; i++) {
-            var opt = uniqueActualStates[i];
-            var el = document.createElement("option");
-            el.textContent = opt;
-            el.value = opt;
-            stateSelected.appendChild(el);
+        for (var i = 0; i < uniqueActualStates.length; i++) {
+          var opt = uniqueActualStates[i];
+          var el = document.createElement("option");
+          el.textContent = opt;
+          el.value = opt;
+          stateSelected.appendChild(el);
         }
-    };
+      }
 
-    function stOptionChanged(stateSelected){
+
+
+
+
+    function stOptionChanged(stateSelected) {
         document.getElementById("onPageMessage").innerText = "";
-        if (stateSelected == ""){
-            document.getElementById("mapDiv").innerText = "";
-            return
+        if (stateSelected === "") {
+          document.getElementById("mapDiv").innerText = "";
+          return;
         }
+      
         var wholeThingList = [];
+        var totalPercentage = 0;
+        var count = 0;
+      
         data.forEach((element) => {
-            tempList = [];
-            if (element.LocationDesc == stateSelected){
-                for (const [key, value] of Object.entries(element)) {
-                    // console.log(`${key}: ${value}`);
-                    tempList.push(value);
-                };
-                wholeThingList.push(tempList);
+          tempList = [];
+          if (element.LocationDesc === stateSelected) {
+            for (const [key, value] of Object.entries(element)) {
+              tempList.push(value);
             }
-        
+            wholeThingList.push(tempList);
+      
+            // Calculate the sum of Data_Value for the selected state
+            totalPercentage += parseFloat(element.Data_Value);
+            count++;
+          }
         });
+      
+        // Calculate the average percentage
+        var averagePercentage = totalPercentage / count;
 
         question = [];
         wholeThingList.forEach((el) => {
@@ -176,34 +208,104 @@
             result += "</table>";
         document.getElementById("table").innerHTML = result;
 
-        addMap(coordinates, stateSelected   );
+        addMap(coordinates, stateSelected, averagePercentage);
         createPieChartForState(stateSelected);
-    };
+    }
 
-    function addMap(coordinates, stateSelected) {
-        var cordinates = coordinates.split(",");
-        var lat = coordinates.split("(");
-        lat = cordinates[0].replace("(", "");
-        lon = cordinates[1].replace(")", "");
-        lat1 = parseFloat(lat);
-        lon1 = parseFloat(lon);
-        var container = L.DomUtil.get('mapDiv');
-        if(container != null){
-        container._leaflet_id = null;
-        }
-        var map = L.map('mapDiv').setView([lat1, lon1], 13);
+
+
+
+
+    var map; // Declare map as a global variable
+    var marker; // Declare marker as a global variable
+    
+    function addMap(coordinates, stateSelected, averagePercentage) {
+      var cordinates = coordinates.split(",");
+      var lat = coordinates.split("(");
+      lat = cordinates[0].replace("(", "");
+      lon = cordinates[1].replace(")", "");
+      lat1 = parseFloat(lat);
+      lon1 = parseFloat(lon);
+    
+      // Check if the map is already initialized
+      if (!map) {
+        // Create a new map only if it doesn't exist
+        map = L.map("mapDiv").setView([lat1, lon1], 13);
         map.setZoom(7);
-        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-            maxZoom: 15,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS',
-
+        L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
+          maxZoom: 50,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS',
         }).addTo(map);
-        var marker = L.marker([lat1, lon1]);    // Creating a Marke
-         // Adding popup to the marker
-         marker.bindPopup(stateSelected).openPopup();
-         marker.bindTooltip(stateSelected, {permanent: true, className: stateSelected, offset: [0, 0] });
-         marker.addTo(map); // Adding marker to the map
-    };
+      } else {
+        // If the map already exists, just update the view
+        map.setView([lat1, lon1], 13);
+      }
+    
+      var thisStateCoords = [];
+      Object.entries(mapsData).forEach((entry) => {
+        const [key, val] = entry;
+        let v = val;
+    
+        if (typeof v === "string") {
+          // Do nothing because it is not an object.
+        } else {
+          theArray = v;
+          theArray.forEach(function (obj) {
+            for (let property in obj) {
+              state = obj.properties.name; // Fix the typo from 'satate' to 'state'
+              if (state == stateSelected) {
+                thisStateCoords = obj.geometry.coordinates[0];
+                break; // Exit the loop once the state is found
+              }
+            }
+          });
+        }
+      });
+    
+      console.log(thisStateCoords); // Verify if thisStateCoords contains the correct coordinates
+    
+      // Check if thisStateCoords is empty or null
+      if (thisStateCoords === null || thisStateCoords.length === 0) {
+        console.log("No coordinates found for the selected state.");
+        return; // Exit the function if no coordinates are found
+      }
+    
+      var polygonCoords = []; // Create an array to hold the polygon coordinates
+      for (var i = 0; i < thisStateCoords.length; i++) {
+        var coord = [thisStateCoords[i][1], thisStateCoords[i][0]];
+        polygonCoords.push(coord);
+      }
+    
+      var statePolygon = L.polygon(polygonCoords, {
+        fillColor: averagePercentage >= 50 ? "darkred" : "lightgreen",
+        color: "white",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5,
+      }).addTo(map);
+    
+      // Event listeners for hover behavior
+      statePolygon.on('mouseover', function (e) {
+        if (!marker) {
+          marker = L.marker([lat1, lon1]).addTo(map);
+          marker.bindPopup(
+            stateSelected + "<br>Obesity Rate: " + averagePercentage.toFixed(2) + "%"
+          );
+        }
+        marker.openPopup();
+      });
+    
+      statePolygon.on('mouseout', function (e) {
+        if (marker) {
+          map.removeLayer(marker);
+          marker = null;
+        }
+      });
+    }
+
+
+
+
 
     function optionChanged(yearSelected) {
         document.getElementById("onPageMessage").innerText = "";
@@ -216,6 +318,10 @@
         addPlot(yearSelected);
         createPieChart(yearSelected);
     };
+
+
+
+
 
     function addPlot(yearSelected) {
         ySelectedArray = [];
@@ -284,6 +390,10 @@
         Plotly.newPlot("plot", [ trace ], layout);
     };
 
+
+
+
+
     function sortBy(c) {
     rows = document.getElementById("sortable").rows.length; // num of rows
     columns = document.getElementById("sortable").rows[0].cells.length; // num of columns
@@ -321,6 +431,10 @@
     }
 };
 
+
+
+
+
 function createPieChart(yearSelected) {
     xValues = []; 
     yValues = [];
@@ -345,6 +459,10 @@ function createPieChart(yearSelected) {
     };
     Plotly.newPlot('plot2', data1, layout);
 };
+
+
+
+
 
 function createPieChartForState(stateSelected) {
     xValues = []; 
