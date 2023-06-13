@@ -104,7 +104,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
 
     function deleteDatabaseHTML(loc) {
-        mes = "Delete " + loc + "?";
+      mes = "Delete " + loc + "? APPLICATION MUST BE RESTARTED...";
         if (confirm(mes)) {
             clearAllDivs();
             eel.deleteDatabase();
@@ -146,7 +146,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
         stateSelected = document.getElementById("selState");
         for (var i = 0; i < uniqueActualStates.length; i++) {
           var opt = uniqueActualStates[i];
-          if(["Guam","Puerto Rico"].includes(opt)) {
+          if(["Guam","Puerto Rico", "District of Columbia"].includes(opt)) {
             continue;
           }
           var el = document.createElement("option");

@@ -1,4 +1,7 @@
-
+#downloadData{
+  position: fixed; 
+  margin-left: 375px;
+}
 #label1{
   position: fixed; 
   /* margin-left: 10em; */
@@ -80,6 +83,7 @@ table.sortable thead {
   color:rgb(175, 169, 169);
   font-size: 15px;
   font-weight: bolder;
+  position: fixed; 
 }
 .label1{
   color:rgb(0, 0, 0);
