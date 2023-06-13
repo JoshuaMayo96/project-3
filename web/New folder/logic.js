@@ -216,92 +216,66 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
 
 
-    var map; // Declare map as a global variable
-    var marker; // Declare marker as a global variable
-    
     function addMap(coordinates, stateSelected, averagePercentage) {
-      var cordinates = coordinates.split(",");
-      var lat = coordinates.split("(");
-      lat = cordinates[0].replace("(", "");
-      lon = cordinates[1].replace(")", "");
-      lat1 = parseFloat(lat);
-      lon1 = parseFloat(lon);
-    
-      // Check if the map is already initialized
-      if (!map) {
-        // Create a new map only if it doesn't exist
-        map = L.map("mapDiv").setView([lat1, lon1], 13);
+        console.log(mapsData);
+        var cordinates = coordinates.split(",");
+        var lat = coordinates.split("(");
+        lat = cordinates[0].replace("(", "");
+        lon = cordinates[1].replace(")", "");
+        lat1 = parseFloat(lat);
+        lon1 = parseFloat(lon);
+        
+        // mapsData.forEach((row)=>{
+        //     if (row.properties.name == stateSelected){
+        //         stateCoordinates = row.geometry.coordinates[0];
+        //     }
+        // });
+        
+        var container = L.DomUtil.get("mapDiv");
+        if (container != null) {
+          container._leaflet_id = null;
+        }
+        var map = L.map("mapDiv").setView([lat1, lon1], 13);
         map.setZoom(7);
         L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
-          maxZoom: 50,
+          maxZoom: 15,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS',
         }).addTo(map);
-      } else {
-        // If the map already exists, just update the view
-        map.setView([lat1, lon1], 13);
-      }
-    
-      var thisStateCoords = [];
-      Object.entries(mapsData).forEach((entry) => {
-        const [key, val] = entry;
-        let v = val;
-    
-        if (typeof v === "string") {
-          // Do nothing because it is not an object.
-        } else {
-          theArray = v;
-          theArray.forEach(function (obj) {
-            for (let property in obj) {
-              state = obj.properties.name; // Fix the typo from 'satate' to 'state'
-              if (state == stateSelected) {
-                thisStateCoords = obj.geometry.coordinates[0];
-                break; // Exit the loop once the state is found
-              }
-            }
+        var marker = L.marker([lat1, lon1]); // Creating a Marker
+      
+        // mapsData.forEach((row) => {
+        //     if (row.properties.name == stateSelected){
+        //         stateCoordinates = row.geometry.coordinates[0];
+        //         console.log(stateCoordinates)
+        //     }
+        // });
+
+        Object.entries(mapsData).forEach((entry) => {
+            const [key, value] = entry;
+            Object.entries(value).forEach((entry1) => {
+                const [k, v] = entry1;
+                // j = v.properties
+                // text = string(j)
+                // console.log(typeof v)
+                console.log( typeof v.geometry)
+                for (let [keys, vals] of Object.entries(v.geometry)){
+
+                    if(vals !== undefined) {
+                        console.log(vals);
+                    }}
+                // if(v.properties["name"] == stateSelected){
+                //     stateCoordinates = v.geometry;
+                //     console.log(stateCoordinates)
+                // }
+            }); 
           });
-        }
-      });
-    
-      console.log(thisStateCoords); // Verify if thisStateCoords contains the correct coordinates
-    
-      // Check if thisStateCoords is empty or null
-      if (thisStateCoords === null || thisStateCoords.length === 0) {
-        console.log("No coordinates found for the selected state.");
-        return; // Exit the function if no coordinates are found
+
+        // Adding popup to the marker with state name and percentage
+        marker
+          .bindPopup(stateSelected + "<br>Obesity Rate: " + averagePercentage.toFixed(2) + "%")
+          .openPopup();
+        marker.addTo(map); // Adding marker to the map
       }
-    
-      var polygonCoords = []; // Create an array to hold the polygon coordinates
-      for (var i = 0; i < thisStateCoords.length; i++) {
-        var coord = [thisStateCoords[i][1], thisStateCoords[i][0]];
-        polygonCoords.push(coord);
-      }
-    
-      var statePolygon = L.polygon(polygonCoords, {
-        fillColor: averagePercentage >= 50 ? "darkred" : "lightgreen",
-        color: "white",
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.5,
-      }).addTo(map);
-    
-      // Event listeners for hover behavior
-      statePolygon.on('mouseover', function (e) {
-        if (!marker) {
-          marker = L.marker([lat1, lon1]).addTo(map);
-          marker.bindPopup(
-            stateSelected + "<br>Obesity Rate: " + averagePercentage.toFixed(2) + "%"
-          );
-        }
-        marker.openPopup();
-      });
-    
-      statePolygon.on('mouseout', function (e) {
-        if (marker) {
-          map.removeLayer(marker);
-          marker = null;
-        }
-      });
-    }
 
 
 

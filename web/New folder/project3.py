@@ -32,11 +32,9 @@ class NoSelf():
             eel.start('project3.html', port=0) #port 0 finds any available port. 
         except Exception as e:
             print(f"ERROR {e} KEEP IN MIND THAT THIS SCRIPT REQUIRES YOU TO pip install eel")
-    
     @eel.expose
     def getJsonMap():
-        path = str(os.getcwd() + "/web/us-states.json")
-        # path = 'C:/Users/joshu/homework/project-3/web/us-states.json'
+        path = 'C:/Users/joshu/homework/project-3/web/us-states.json'
         mapsData = open(path)
         content = mapsData.read()
         jsonData = json.loads(content)
@@ -108,13 +106,7 @@ class NoSelf():
             d = dict()
             indx = 0
             for el in row:
-                try:
-                    d.update({listOfKeys[indx] : str(el)})
-                except:
-                    os.remove("C:/c_folder/c_folder/PROJECT3/Resources/obesity.db")
-                    os.remove("C:/c_folder/c_folder/PROJECT3/Resources/obesity_data.csv")
-                    traceback.print_exc()
-                    print("Please restart the software")
+                d.update({listOfKeys[indx] : str(el)})
                 indx += 1
             tempList.append(d)
             eel.updateMessage(str(row))
