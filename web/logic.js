@@ -2,8 +2,8 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
     var cPrev = -1;
     window.onload =  getDataFromPython;
     var states = [
-            'Alaska',
-            'Alabama',
+            "Alabama",
+            'Alaska',	
             'Arizona',	
             'Arkansas',	
             'California',	
@@ -51,21 +51,11 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             'Washington',
             'West Virginia',
             'Wisconsin',
-            'Wyoming',  
+            'Wyoming'
         ]
-        // 'Palau',
-        // 'Puerto Rico',
-        // 'Virgin Islands'
-        // 'Federated States of Micronesia',
-        //     'Guam',
-        //     'Marshall Islands',
-        //     'Northern Mariana Islands',
-        // 'American Samoa',
-        // 'District of Columbia',
 
     eel.expose(getDataFromPython);
     async function getDataFromPython() {
-        window.resizeTo(screen.availWidth, screen.availHeight);
         globalThis.data = await eel.collectData()(); //needs to be a global var so we can access it from any function. 
         globalThis.mapsData = await eel.getJsonMap()();
         iterateDict();
@@ -104,7 +94,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
 
     function deleteDatabaseHTML(loc) {
-      mes = "Delete " + loc + "? APPLICATION MUST BE RESTARTED...";
+        mes = "Delete " + loc + "?";
         if (confirm(mes)) {
             clearAllDivs();
             eel.deleteDatabase();
@@ -146,9 +136,6 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
         stateSelected = document.getElementById("selState");
         for (var i = 0; i < uniqueActualStates.length; i++) {
           var opt = uniqueActualStates[i];
-          if(["Guam","Puerto Rico", "District of Columbia"].includes(opt)) {
-            continue;
-          }
           var el = document.createElement("option");
           el.textContent = opt;
           el.value = opt;
@@ -160,9 +147,8 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
 
 
-    function stOptionChanged(stateSelected) {
+      function stOptionChanged(stateSelected) {
         document.getElementById("onPageMessage").innerText = "";
-        document.getElementById("mapCanvas").scrollIntoView(true);
         if (stateSelected === "") {
           document.getElementById("mapDiv").innerText = "";
           return;
@@ -188,43 +174,53 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
       
         // Calculate the average percentage
         var averagePercentage = totalPercentage / count;
-
+      
         question = [];
         wholeThingList.forEach((el) => {
-            q = el[2];
-            tempList = [];
-            if (q.includes("Percent of adults aged 18 years and older who have obesity")){
-                year = el[0];
-                state = el[1];
-                percentage = el[3];
-                ageRange = el[4];
-                coordinates = el[5];
-                tempList.push([q,year,state,percentage,ageRange,coordinates]);
-            }   
-            question.push(tempList);
+          q = el[2];
+          tempList = [];
+          if (q.includes("Percent of adults aged 18 years and older who have obesity")) {
+            year = el[0];
+            state = el[1];
+            percentage = el[3];
+            ageRange = el[4];
+            coordinates = el[5];
+            tempList.push([q, year, state, percentage, ageRange, coordinates]);
+          }
+          question.push(tempList);
         });
-
-        var result = "<table id='sortable' border=1> <thead> <tr><th class='header' onclick='sortBy(0)'>YEAR</th><th class='header'onclick='sortBy(1)'>State</th><th class='header' onclick='sortBy(2)'>Question</th><th class='header' onclick='sortBy(3)'>Percentage</th><th class='header' onclick='sortBy(4)'>Age Range</th><th class='header' onclick='sortBy(5)'>Coordinates</th></tr></thead>";
-            for(var i=0; i<wholeThingList.length; i++) {
-                result += "<tr>";
-                for(var j=0; j<wholeThingList[i].length; j++){
-                    result += "<td>"+wholeThingList[i][j]+"</td>";
-                }
-                result += "</tr>";
-            }
-            result += "</table>";
+      
+        wholeThingList.sort((a, b) => {
+          if (a[0] === b[0]) { // If the years are the same, sort by age range
+            return a[4].localeCompare(b[4]);
+          } else { // Otherwise, sort by year
+            return a[0] - b[0];
+          }
+        });
+      
+        var result =
+          "<table id='sortable' border=1> <thead> <tr><th class='header' onclick='sortBy(0)'>YEAR</th><th class='header'onclick='sortBy(1)'>State</th><th class='header' onclick='sortBy(2)'>Question</th><th class='header' onclick='sortBy(3)'>Percentage</th><th class='header' onclick='sortBy(4)'>Age Range</th><th class='header' onclick='sortBy(5)'>Coordinates</th></tr></thead>";
+        for (var i = 0; i < wholeThingList.length; i++) {
+          result += "<tr>";
+          for (var j = 0; j < wholeThingList[i].length; j++) {
+            result += "<td>" + wholeThingList[i][j] + "</td>";
+          }
+          result += "</tr>";
+        }
+        result += "</table>";
         document.getElementById("table").innerHTML = result;
-
+      
         addMap(coordinates, stateSelected, averagePercentage);
         createPieChartForState(stateSelected);
-    }
+      }
 
 
 
 
 
     var map; // Declare map as a global variable
-    var marker; // Declare marker as a global variable
+    var legendControl; // Declare legendControl as a global variable
+    
     function addMap(coordinates, stateSelected, averagePercentage) {
       var cordinates = coordinates.split(",");
       var lat = coordinates.split("(");
@@ -232,6 +228,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
       lon = cordinates[1].replace(")", "");
       lat1 = parseFloat(lat);
       lon1 = parseFloat(lon);
+    
       // Check if the map is already initialized
       if (!map) {
         // Create a new map only if it doesn't exist
@@ -245,10 +242,17 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
         // If the map already exists, just update the view
         map.setView([lat1, lon1], 13);
       }
+    
+      // Remove the existing legend control if it exists
+      if (legendControl) {
+        legendControl.remove();
+      }
+    
       var thisStateCoords = [];
       Object.entries(mapsData).forEach((entry) => {
         const [key, val] = entry;
         let v = val;
+    
         if (typeof v === "string") {
           // Do nothing because it is not an object.
         } else {
@@ -257,56 +261,87 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             for (let property in obj) {
               state = obj.properties.name; // Fix the typo from 'satate' to 'state'
               if (state == stateSelected) {
-                thisStateCoords = obj.geometry.coordinates[0];
+                if (obj.geometry.type === "Polygon") {
+                  thisStateCoords.push(obj.geometry.coordinates[0]);
+                } else if (obj.geometry.type === "MultiPolygon") {
+                  obj.geometry.coordinates.forEach((coords) => {
+                    thisStateCoords.push(coords[0]);
+                  });
+                }
                 break; // Exit the loop once the state is found
               }
             }
           });
         }
       });
+    
       console.log(thisStateCoords); // Verify if thisStateCoords contains the correct coordinates
+    
       // Check if thisStateCoords is empty or null
       if (thisStateCoords === null || thisStateCoords.length === 0) {
         console.log("No coordinates found for the selected state.");
         return; // Exit the function if no coordinates are found
       }
-      var polygonCoords = []; // Create an array to hold the polygon coordinates
-      for (var i = 0; i < thisStateCoords.length; i++) {
-        var coord = [thisStateCoords[i][1], thisStateCoords[i][0]];
-        polygonCoords.push(coord);
-      }
-      var color = getColorFromPercentage(averagePercentage);
-      var statePolygon = L.polygon(polygonCoords, {
-        fillColor: color,
-        color: "white",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.9,
-      }).addTo(map);
-      // Event listeners for hover behavior
-      statePolygon.on('mouseover', function (e) {
-        if (!marker) {
-          marker = L.marker([lat1, lon1]).addTo(map);
-          marker.bindPopup(
-            stateSelected + "<br>Obesity Rate: " + averagePercentage.toFixed(2) + "%"
-          );
-        }
-        marker.openPopup();
+    
+      var polygons = thisStateCoords.map(function (coords) {
+        var polygonCoords = coords.map(function (coord) {
+          return [coord[1], coord[0]];
+        });
+    
+        var color = getColorFromPercentage(averagePercentage);
+    
+        var polygon = L.polygon(polygonCoords, {
+          fillColor: color,
+          color: "white",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.9,
+        }).addTo(map);
+    
+        // Event listeners for hover behavior
+        polygon.on('mouseover', function (e) {
+          if (legendControl) {
+            map.removeControl(legendControl);
+            legendControl = null;
+          }
+    
+          // Create the legend content for the specific polygon
+          var legendContent =
+            "<h4>" + stateSelected + "</h4>" +
+            "<p>Obesity Prevelance: " + averagePercentage.toFixed(2) + "%</p>";
+    
+          legendControl = L.control({ position: "bottomright" });
+          legendControl.onAdd = function (map) {
+            var div = L.DomUtil.create("div", "legend");
+            div.style.backgroundColor = "white"; // Set the background color to white
+            div.innerHTML = legendContent;
+            return div;
+          };
+          legendControl.addTo(map);
+        });
+    
+        polygon.on('mouseout', function (e) {
+          if (legendControl) {
+            map.removeControl(legendControl);
+            legendControl = null;
+          }
+        });
+    
+        return polygon;
       });
-      statePolygon.on('mouseout', function (e) {
-        if (marker) {
-          map.removeLayer(marker);
-          marker = null;
-        }
-      });
+    
+      var stateGroup = L.layerGroup(polygons).addTo(map);
     }
+    
     function getColorFromPercentage(percentage) {
       // Calculate the color based on the percentage value
-      var darkred = Math.round((percentage - 20) * (255 / 25));
-      var green = Math.round((40 - percentage) * (255 / 25));
+      var darkred = Math.round((percentage - 15) * (255 / 25));
+      var green = Math.round((38 - percentage) * (255 / 25));
       var blue = 0;
+    
       return rgbToHex(darkred, green, blue);
     }
+    
     function rgbToHex(r, g, b) {
       // Convert RGB values to hexadecimal color code
       var componentToHex = function (c) {
@@ -322,11 +357,6 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
 
     function optionChanged(yearSelected) {
         document.getElementById("onPageMessage").innerText = "";
-        document.getElementById('plot2').scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-          inline: 'center'
-      });
         if (yearSelected == ""){
             document.getElementById("plot").innerText = "";
             document.getElementById("plot2").innerText = "";
@@ -403,7 +433,7 @@ document.title = "procject-3 Percent of adults aged 18 years and older who have 
             },
             width: 1255,
             height: 500,
-            title: "COMBINED PERCENTAGE (AVE) PER STATE FOR THE YEAR " + yearSelected 
+            title: "Obesity Prevelance by State for" + yearSelected 
         };
         Plotly.newPlot("plot", [ trace ], layout);
     };
@@ -468,7 +498,7 @@ function createPieChart(yearSelected) {
         values: xValues,
         labels: yValues,
         type: 'pie',
-        title: yearSelected +' - Per Age'
+        title: yearSelected +' - USA Obesity Prevelance by Age'
     }];
 
     var layout = {
@@ -495,7 +525,7 @@ function createPieChartForState(stateSelected) {
         values: xValues,
         labels: yValues,
         type: 'pie',
-        title: stateSelected +' - Per Age'
+        title: stateSelected +' - Obesity Prevelance by Age'
     }];
 
     var layout = {
@@ -504,7 +534,3 @@ function createPieChartForState(stateSelected) {
     };
     Plotly.newPlot('plot3', dat, layout);
 };
-
-// function focusDiv() {
-//     document.getElementById("plotDiv").focus();
-// };
